@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoPrime: AI-Enabled Campus Sustainability Prototype | GNIOT</title>
+  <!-- Google Fonts: Plus Jakarta Sans & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            forest: {
+              900: '#092d22',
+              800: '#0F4C3A', // Primary forest green
+              700: '#17604b',
+              600: '#1f7960',
+              50: '#f0f9f6',
+            },
+            sage: {
+              DEFAULT: '#8FBC8F',
+              light: '#b2d8b2',
+              dark: '#6e9e6e',
+              50: '#f5faf5',
+            },
+            campus: {
+              bg: '#F4F7F5',
+              card: '#FFFFFF',
+              border: '#E2E8F0',
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            display: ['"Outfit"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #F4F7F5;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    
+    /* Custom scrollbar for audit log */
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Pulse glow effect */
+    @keyframes pulse-subtle {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.02); }
+    }
+    .animate-pulse-subtle {
+      animation: pulse-subtle 2s infinite ease-in-out;
+    }
+
+    @keyframes leak-flash {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.15); }
+    }
+    .leak-active {
+      animation: leak-flash 1.5s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 antialiased flex flex-col justify-between">
+
+  <!-- TOP HEADER BAR -->
+  <header class="bg-forest-800 text-white shadow-md border-b border-forest-900 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      
+      <!-- Brand & Title -->
+      <div class="flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-sage to-forest-600 flex items-center justify-center shadow-inner text-forest-900 font-extrabold text-xl">
+          <i data-lucide="leaf" class="w-6 h-6 text-white stroke-[2.5]"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 class="text-lg sm:text-xl font-bold font-display tracking-tight text-white flex items-center gap-2">
+              EcoPrime: AI-Enabled Campus Sustainability Prototype
+            </h1>
+            <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-emerald-950 text-sage-light border border-sage/40">
+              GNIOT
+            </span>
+          </div>
+          <div class="flex items-center gap-2 text-xs text-emerald-100/80 mt-0.5">
+            <span class="inline-flex items-center gap-1 font-medium bg-forest-900/60 px-2 py-0.5 rounded-full border border-forest-700">
+              <i data-lucide="users" class="w-3 h-3 text-sage"></i> Team Badge: <strong class="text-white font-semibold">Team Project Prime</strong>
+            </span>
+            <span class="hidden sm:inline text-emerald-300">•</span>
+            <span class="hidden sm:inline">Greater Noida Institute of Technology IoT & AI Testbed</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mode Switch Toggle -->
+      <div class="flex items-center justify-between sm:justify-end gap-3 bg-forest-900/80 p-1.5 rounded-xl border border-forest-700/70">
+        <div class="text-xs font-medium text-emerald-200 pl-2 pr-1 flex items-center gap-1.5">
+          <i data-lucide="calendar" class="w-3.5 h-3.5 text-sage"></i>
+          <span>Mode:</span>
+        </div>
+        <div class="inline-flex rounded-lg p-0.5 bg-forest-950 border border-forest-700/50">
+          <button id="btn-mode-weekday" onclick="setMode('weekday')" class="px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 bg-forest-700 text-white shadow-sm">
+            <i data-lucide="briefcase" class="w-3.5 h-3.5"></i>
+            Weekday Class Mode
+          </button>
+          <button id="btn-mode-weekend" onclick="setMode('weekend')" class="px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 text-emerald-300 hover:text-white">
+            <i data-lucide="moon" class="w-3.5 h-3.5"></i>
+            Weekend Idle Mode
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- EMERGENCY LEAK BANNER (Hidden by default, shown when leak simulated) -->
+  <div id="leak-alert-banner" class="hidden bg-red-600 text-white px-4 py-3 shadow-lg transition-all duration-300 border-b-2 border-red-800">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="p-2 bg-red-700 rounded-lg animate-bounce">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-yellow-300"></i>
+        </div>
+        <div>
+          <div class="font-extrabold text-sm sm:text-base tracking-wide flex items-center gap-2">
+            CRITICAL HYDRAULIC SURGE DETECTED: MAIN CAMPUS RISER PIPELINE
+            <span class="bg-red-800 text-xs uppercase px-2 py-0.5 rounded font-mono">CODE: FLW-909</span>
+          </div>
+          <p class="text-xs text-red-100">
+            Real-time ultrasonic telemetry registered <span class="font-bold underline">32,500 L/hr</span> flow rate in Main Block Conduit. AI auto-shutoff valve solenoid trigger queued.
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="resetBaseline()" class="px-3 py-1.5 bg-white text-red-700 text-xs font-bold rounded-lg hover:bg-red-50 transition shadow">
+          Acknowledge & Neutralize Leak
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN DASHBOARD CONTENT -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1">
+
+    <!-- KPI SUMMARY CARDS (4 in a row) -->
+    <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      
+      <!-- KPI Card 1: Daily Idle Energy Saved -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-campus-border hover:shadow-md transition-shadow relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-forest-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 pointer-events-none"></div>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold tracking-wider uppercase text-slate-500">Daily Idle Energy Saved</span>
+          <div class="w-9 h-9 rounded-xl bg-forest-800 text-sage flex items-center justify-center">
+            <i data-lucide="zap" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="kpi-energy" class="text-2xl sm:text-3xl font-extrabold font-display text-forest-800 tracking-tight">384.2</span>
+          <span class="text-sm font-bold text-forest-600">kWh</span>
+        </div>
+        <div class="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
+          <span class="inline-flex items-center text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded text-[11px]">
+            <i data-lucide="trending-up" class="w-3 h-3 mr-0.5"></i>
+            <span id="kpi-energy-sub">+18.4% vs Baseline</span>
+          </span>
+          <span class="text-slate-400">via Smart Relays</span>
+        </div>
+      </div>
+
+      <!-- KPI Card 2: Daily Carbon Abated -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-campus-border hover:shadow-md transition-shadow relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-sage-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 pointer-events-none"></div>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold tracking-wider uppercase text-slate-500">Daily Carbon Abated</span>
+          <div class="w-9 h-9 rounded-xl bg-sage/30 text-forest-800 flex items-center justify-center">
+            <i data-lucide="cloud-off" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span id="kpi-carbon" class="text-2xl sm:text-3xl font-extrabold font-display text-forest-800 tracking-tight">315.0</span>
+          <span class="text-sm font-bold text-forest-600">kg CO2e</span>
+        </div>
+        <div class="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
+          <span class="inline-flex items-center text-emerald-700 font-semibold bg-sage-50 px-1.5 py-0.5 rounded text-[11px]">
+            <i data-lucide="shield-check" class="w-3 h-3 mr-0.5"></i>
+            <span id="kpi-carbon-sub">Scope 2 Reduction</span>
+          </span>
+          <span class="text-slate-400">CEA Grid Factor</span>
+        </div>
+      </div>
+
+      <!-- KPI Card 3: Main Water Flow Rate -->
+      <div id="card-water-flow" class="bg-white rounded-2xl p-5 shadow-sm border border-campus-border hover:shadow-md transition-all relative overflow-hidden group">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold tracking-wider uppercase text-slate-500">Main Water Flow Rate</span>
+          <div id="icon-water-container" class="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center transition-colors">
+            <i data-lucide="droplet" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-1">
+          <span id="kpi-water" class="text-2xl font-extrabold font-display text-slate-800 tracking-tight transition-colors">
+            480 L/hr
+          </span>
+        </div>
+        <div class="mt-2 text-xs flex items-center gap-1.5">
+          <span id="kpi-water-status-pill" class="inline-flex items-center font-semibold px-2 py-0.5 rounded text-[11px] bg-slate-100 text-slate-700">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>
+            Normal Baseline
+          </span>
+          <span id="kpi-water-sub" class="text-slate-400">Riser telemetry</span>
+        </div>
+      </div>
+
+      <!-- KPI Card 4: AI Occupancy Accuracy -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-campus-border hover:shadow-md transition-shadow relative overflow-hidden group">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-forest-50 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110 pointer-events-none"></div>
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-semibold tracking-wider uppercase text-slate-500">AI Occupancy Accuracy</span>
+          <div class="w-9 h-9 rounded-xl bg-forest-700 text-white flex items-center justify-center">
+            <i data-lucide="cpu" class="w-4 h-4"></i>
+          </div>
+        </div>
+        <div class="flex items-baseline gap-2">
+          <span class="text-2xl sm:text-3xl font-extrabold font-display text-forest-800 tracking-tight">99.6%</span>
+        </div>
+        <div class="mt-2 text-xs text-slate-500 flex items-center gap-1.5">
+          <span class="inline-flex items-center text-forest-700 font-semibold bg-forest-50 border border-forest-100 px-2 py-0.5 rounded text-[11px]">
+            <i data-lucide="check-circle" class="w-3 h-3 mr-1 text-forest-600"></i>
+            Timetable Synced
+          </span>
+          <span class="text-slate-400">Kalman-Filtered PIR</span>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- TWO COLUMN LAYOUT -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- LEFT SIDE: LECTURE WING CONTROL PANEL (7 cols) -->
+      <section class="lg:col-span-7 space-y-4">
+        
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-campus-border">
+          
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-slate-100 gap-2 mb-4">
+            <div>
+              <h2 class="text-base font-bold font-display text-forest-800 flex items-center gap-2">
+                <i data-lucide="layout-grid" class="w-5 h-5 text-forest-600"></i>
+                Lecture Wing Intelligent Control Panel
+              </h2>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Real-time sub-metering, PIR infrared thermal sensing, and IoT smart relay telemetry
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-1 rounded-md border border-slate-200 flex items-center gap-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                GNIOT IoT Core Live
+              </span>
+            </div>
+          </div>
+
+          <!-- Rooms List -->
+          <div class="space-y-3" id="rooms-container">
+            <!-- Room cards rendered dynamically by JavaScript -->
+          </div>
+
+        </div>
+
+        <!-- System Architecture & Footprint Infographic Footer Note -->
+        <div class="bg-gradient-to-r from-forest-800 to-forest-700 text-white rounded-2xl p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 bg-forest-900/60 rounded-xl border border-forest-600">
+              <i data-lucide="radio" class="w-5 h-5 text-sage"></i>
+            </div>
+            <div>
+              <div class="text-xs font-bold text-white">GNIOT Campus Grid Edge Gateway #04</div>
+              <div class="text-[11px] text-emerald-200">MQTT over TLS 1.3 • Polling interval: 500ms • Dynamic load shifting active</div>
+            </div>
+          </div>
+          <div class="text-right flex items-center gap-2">
+            <span class="text-xs font-mono bg-forest-900/80 px-2.5 py-1 rounded-md text-sage border border-forest-600">
+              IP: 10.24.18.102
+            </span>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT SIDE: AI SIMULATION & ANOMALY CONTROLS (5 cols) -->
+      <section class="lg:col-span-5 space-y-4">
+        
+        <!-- Interactive Demo Buttons Card -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-campus-border">
+          <div class="pb-3 border-b border-slate-100 mb-4">
+            <h2 class="text-base font-bold font-display text-forest-800 flex items-center gap-2">
+              <i data-lucide="sliders" class="w-5 h-5 text-forest-600"></i>
+              AI Simulation & Anomaly Controls
+            </h2>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Live evaluative stress-tests for jury live demonstration
+            </p>
+          </div>
+
+          <div class="space-y-3">
+            
+            <!-- Button 1: Simulate 15-Min Vacancy Cutoff -->
+            <button onclick="simulateVacancyCutoff()" class="w-full text-left p-3.5 rounded-xl border border-emerald-200 bg-emerald-50/50 hover:bg-emerald-100/60 transition-all flex items-start gap-3.5 group">
+              <div class="p-2.5 rounded-lg bg-emerald-600 text-white group-hover:scale-105 transition-transform shadow-sm">
+                <i data-lucide="power" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-bold text-emerald-950 group-hover:text-emerald-900">
+                    Simulate 15-Min Vacancy Cutoff
+                  </span>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-emerald-600 group-hover:translate-x-0.5 transition-transform"></i>
+                </div>
+                <p class="text-xs text-emerald-800/80 mt-0.5">
+                  Detects vacant rooms after 15 mins, executes auto-trip on non-essential HVAC & lighting circuits, and increments avoided kWh.
+                </p>
+              </div>
+            </button>
+
+            <!-- Button 2: Simulate Plumbing Pipe Leak -->
+            <button onclick="simulateLeak()" class="w-full text-left p-3.5 rounded-xl border border-red-200 bg-red-50/50 hover:bg-red-100/60 transition-all flex items-start gap-3.5 group">
+              <div class="p-2.5 rounded-lg bg-red-600 text-white group-hover:scale-105 transition-transform shadow-sm">
+                <i data-lucide="alert-octagon" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-bold text-red-950 group-hover:text-red-900">
+                    Simulate Plumbing Pipe Leak
+                  </span>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-red-600 group-hover:translate-x-0.5 transition-transform"></i>
+                </div>
+                <p class="text-xs text-red-800/80 mt-0.5">
+                  Injects an acoustic pressure drop spike: triggers a 32,500 L/hr main rupture alert with system isolation notification.
+                </p>
+              </div>
+            </button>
+
+            <!-- Button 3: Reset System Baseline -->
+            <button onclick="resetBaseline()" class="w-full text-left p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-all flex items-start gap-3.5 group">
+              <div class="p-2.5 rounded-lg bg-slate-700 text-white group-hover:scale-105 transition-transform shadow-sm">
+                <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm font-bold text-slate-800 group-hover:text-black">
+                    Reset System Baseline
+                  </span>
+                  <i data-lucide="chevron-right" class="w-4 h-4 text-slate-500 group-hover:translate-x-0.5 transition-transform"></i>
+                </div>
+                <p class="text-xs text-slate-500 mt-0.5">
+                  Restores typical operating parameters, silences rupture flags, and resets all simulated room overrides.
+                </p>
+              </div>
+            </button>
+
+          </div>
+        </div>
+
+        <!-- AI Decision & ESG Audit Log -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-campus-border flex flex-col">
+          <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-3">
+            <div class="flex items-center gap-2">
+              <i data-lucide="terminal" class="w-4 h-4 text-forest-700"></i>
+              <h3 class="text-sm font-bold font-display text-forest-800">
+                AI Decision & ESG Audit Log
+              </h3>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] text-slate-400 font-mono" id="log-count">4 events logged</span>
+              <button onclick="clearAuditLog()" title="Clear Log" class="text-slate-400 hover:text-slate-600 p-1">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Live Scrolling Log Window -->
+          <div id="audit-log-box" class="h-64 overflow-y-auto custom-scroll space-y-2 pr-1 text-xs font-mono">
+            <!-- Log entries injected here -->
+          </div>
+
+          <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              Hash-chained ESG audit ledger
+            </span>
+            <span>GNIOT Prime v2.4</span>
+          </div>
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-white border-t border-campus-border py-4 mt-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
+      <div>
+        <strong class="text-forest-800">EcoPrime Smart Campus Dashboard</strong> &bull; Greater Noida Institute of Technology (GNIOT)
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Designed by <strong class="text-forest-700 font-semibold">Team Project Prime</strong></span>
+        <span>&bull;</span>
+        <span class="text-emerald-700 font-medium">UN SDG #11 & #13 Campus Framework</span>
+      </div>
+    </div>
+  </footer>
+
+  <!-- SCRIPT LOGIC -->
+  <script>
+    // State Model
+    const state = {
+      mode: 'weekday', // 'weekday' | 'weekend'
+      leakSimulated: false,
+      baseEnergySaved: {
+        weekday: 384.2,
+        weekend: 429.5
+      },
+      additionalSavedEnergy: 0,
+      carbonFactor: 0.82, // ~0.82 kg CO2e per kWh for regional grid
+      rooms: [
+        {
+          id: 'room-101',
+          name: 'Block A - Room 101',
+          type: 'Lecture Theater (Cap: 80)',
+          weekday: { pir: 'Occupied', timetable: 'Class Active', prediction: 94, relay: 'ON' },
+          weekend: { pir: 'Vacant', timetable: 'Empty Break', prediction: 5, relay: 'AUTO CUTOFF' },
+          manualOverride: false
+        },
+        {
+          id: 'room-102',
+          name: 'Block A - Room 102',
+          type: 'Tutorial Room (Cap: 40)',
+          weekday: { pir: 'Vacant', timetable: 'Empty Break', prediction: 12, relay: 'AUTO CUTOFF' },
+          weekend: { pir: 'Vacant', timetable: 'Empty Break', prediction: 2, relay: 'AUTO CUTOFF' },
+          manualOverride: false
+        },
+        {
+          id: 'room-204',
+          name: 'Block B - Lab 204',
+          type: 'IoT & Systems Lab (Cap: 60)',
+          weekday: { pir: 'Occupied', timetable: 'Class Active', prediction: 88, relay: 'ON' },
+          weekend: { pir: 'Vacant', timetable: 'Empty Break', prediction: 18, relay: 'AUTO CUTOFF' },
+          manualOverride: false
+        },
+        {
+          id: 'room-301',
+          name: 'Block C - Hall 301',
+          type: 'Seminar Auditorium (Cap: 250)',
+          weekday: { pir: 'Vacant', timetable: 'Empty Break', prediction: 24, relay: 'AUTO CUTOFF' },
+          weekend: { pir: 'Vacant', timetable: 'Empty Break', prediction: 4, relay: 'AUTO CUTOFF' },
+          manualOverride: false
+        }
+      ]
+    };
+
+    // Format timestamp helper
+    function getTimestamp() {
+      const now = new Date();
+      return now.toTimeString().split(' ')[0] + '.' + String(now.getMilliseconds()).padStart(3, '0').slice(0, 2);
+    }
+
+    // Append log entry
+    function logEvent(title, detail, type = 'info') {
+      const logBox = document.getElementById('audit-log-box');
+      const time = getTimestamp();
+      
+      let badgeStyle = 'bg-slate-100 text-slate-700 border-slate-200';
+      let icon = 'info';
+
+      if (type === 'success') {
+        badgeStyle = 'bg-emerald-50 text-emerald-800 border-emerald-200';
+        icon = 'check-circle';
+      } else if (type === 'alert') {
+        badgeStyle = 'bg-red-50 text-red-800 border-red-200';
+        icon = 'alert-triangle';
+      } else if (type === 'override') {
+        badgeStyle = 'bg-amber-50 text-amber-800 border-amber-200';
+        icon = 'toggle-right';
+      }
+
+      const logItem = document.createElement('div');
+      logItem.className = `p-2.5 rounded-lg border text-xs leading-relaxed transition-all ${badgeStyle}`;
+      logItem.innerHTML = `
+        <div class="flex items-center justify-between font-mono text-[11px] mb-0.5">
+          <span class="font-bold tracking-tight uppercase">${title}</span>
+          <span class="text-[10px] opacity-75">${time}</span>
+        </div>
+        <div class="text-[11.5px] opacity-90">${detail}</div>
+      `;
+
+      logBox.insertBefore(logItem, logBox.firstChild);
+
+      // update count
+      const count = logBox.children.length;
+      document.getElementById('log-count').innerText = `${count} events logged`;
+    }
+
+    function clearAuditLog() {
+      document.getElementById('audit-log-box').innerHTML = '';
+      logEvent('SYSTEM', 'Audit display flushed. Persistent ledger retained in secure flash memory.', 'info');
+    }
+
+    // Set Weekday vs Weekend Mode
+    function setMode(mode) {
+      if (state.mode === mode) return;
+      state.mode = mode;
+
+      // Update toggle buttons styling
+      const btnWeekday = document.getElementById('btn-mode-weekday');
+      const btnWeekend = document.getElementById('btn-mode-weekend');
+
+      if (mode === 'weekday') {
+        btnWeekday.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 bg-forest-700 text-white shadow-sm";
+        btnWeekend.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 text-emerald-300 hover:text-white";
+        logEvent('MODE CHANGE', 'Switched to [Weekday Class Mode]. Dynamic timetable schedules loaded for 4 academic blocks.', 'info');
+      } else {
+        btnWeekend.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 bg-forest-700 text-white shadow-sm";
+        btnWeekday.className = "px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 text-emerald-300 hover:text-white";
+        logEvent('MODE CHANGE', 'Switched to [Weekend Idle Mode]. Aggressive standby power shaving triggered across all wings.', 'info');
+      }
+
+      // Reset individual overrides when switching global modes
+      state.rooms.forEach(r => r.manualOverride = false);
+
+      updateKPIs();
+      renderRooms();
+    }
+
+    // Update KPI Cards
+    function updateKPIs() {
+      const currentBaseEnergy = state.baseEnergySaved[state.mode];
+      const totalEnergy = (currentBaseEnergy + state.additionalSavedEnergy).toFixed(1);
+      
+      // Carbon abated: exact formula requested (Weekday: 315.0 kg CO2e, Weekend: 352.0 kg CO2e) + incremental additions
+      let carbonVal = state.mode === 'weekday' ? 315.0 : 352.0;
+      if (state.additionalSavedEnergy > 0) {
+        carbonVal = (carbonVal + (state.additionalSavedEnergy * 0.82)).toFixed(1);
+      } else {
+        carbonVal = carbonVal.toFixed(1);
+      }
+
+      document.getElementById('kpi-energy').innerText = totalEnergy;
+      document.getElementById('kpi-carbon').innerText = carbonVal;
+
+      if (state.mode === 'weekday') {
+        document.getElementById('kpi-energy-sub').innerText = '+18.4% vs Baseline';
+        document.getElementById('kpi-carbon-sub').innerText = 'Scope 2 Reduction';
+      } else {
+        document.getElementById('kpi-energy-sub').innerText = '+34.2% Weekend Shave';
+        document.getElementById('kpi-carbon-sub').innerText = 'Max Idle Curtailment';
+      }
+
+      // Water KPI state
+      const cardWater = document.getElementById('card-water-flow');
+      const kpiWater = document.getElementById('kpi-water');
+      const kpiWaterStatus = document.getElementById('kpi-water-status-pill');
+      const iconWater = document.getElementById('icon-water-container');
+      const banner = document.getElementById('leak-alert-banner');
+
+      if (state.leakSimulated) {
+        kpiWater.innerText = '32,500 L/hr';
+        kpiWater.className = 'text-2xl font-extrabold font-display text-red-600 tracking-tight animate-pulse';
+        kpiWaterStatus.className = 'inline-flex items-center font-bold px-2 py-0.5 rounded text-[11px] bg-red-100 text-red-700 border border-red-200 animate-pulse';
+        kpiWaterStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-red-600 mr-1.5 animate-ping"></span>RUPTURE ALERT';
+        cardWater.classList.add('border-red-400', 'bg-red-50/40', 'leak-active');
+        iconWater.className = 'w-9 h-9 rounded-xl bg-red-600 text-white flex items-center justify-center';
+        banner.classList.remove('hidden');
+      } else {
+        kpiWater.innerText = '480 L/hr - Normal';
+        kpiWater.className = 'text-2xl font-extrabold font-display text-slate-800 tracking-tight';
+        kpiWaterStatus.className = 'inline-flex items-center font-semibold px-2 py-0.5 rounded text-[11px] bg-emerald-50 text-emerald-800 border border-emerald-200';
+        kpiWaterStatus.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>Normal Pressure (2.4 bar)';
+        cardWater.classList.remove('border-red-400', 'bg-red-50/40', 'leak-active');
+        iconWater.className = 'w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center';
+        banner.classList.add('hidden');
+      }
+
+      lucide.createIcons();
+    }
+
+    // Render Lecture Wing Rooms
+    function renderRooms() {
+      const container = document.getElementById('rooms-container');
+      container.innerHTML = '';
+
+      state.rooms.forEach(room => {
+        const modeData = room[state.mode];
+        const isOverridden = room.manualOverride;
+        const currentRelay = isOverridden ? 'ON' : modeData.relay;
+        const isRelayOn = currentRelay === 'ON';
+
+        const card = document.createElement('div');
+        card.className = `p-4 rounded-xl border transition-all duration-200 ${
+          isRelayOn 
+            ? 'bg-slate-50/70 border-slate-200 hover:border-slate-300' 
+            : 'bg-emerald-50/30 border-emerald-100 hover:border-emerald-200'
+        }`;
+
+        card.innerHTML = `
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            
+            <!-- Room Info & Status -->
+            <div class="space-y-1.5 flex-1">
+              <div class="flex items-center gap-2">
+                <h4 class="font-bold text-sm text-slate-900">${room.name}</h4>
+                <span class="text-[11px] text-slate-400">${room.type}</span>
+                ${isOverridden ? '<span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-1.5 py-0.2 rounded border border-amber-300 flex items-center gap-1"><i data-lucide="shield-alert" class="w-3 h-3"></i> Faculty Override Active</span>' : ''}
+              </div>
+
+              <!-- Indicators Grid -->
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                
+                <!-- PIR Sensor Status -->
+                <div class="bg-white p-2 rounded-lg border border-slate-100 shadow-2xs">
+                  <div class="text-[10px] uppercase font-semibold text-slate-400">PIR Sensor</div>
+                  <div class="text-xs font-bold flex items-center gap-1.5 mt-0.5 ${modeData.pir === 'Occupied' ? 'text-emerald-700' : 'text-slate-500'}">
+                    <span class="w-2 h-2 rounded-full ${modeData.pir === 'Occupied' ? 'bg-emerald-500 animate-pulse' : 'bg-slate-300'}"></span>
+                    ${modeData.pir}
+                  </div>
+                </div>
+
+                <!-- Timetable Status -->
+                <div class="bg-white p-2 rounded-lg border border-slate-100 shadow-2xs">
+                  <div class="text-[10px] uppercase font-semibold text-slate-400">Timetable</div>
+                  <div class="text-xs font-bold flex items-center gap-1.5 mt-0.5 ${modeData.timetable === 'Class Active' ? 'text-indigo-700' : 'text-slate-500'}">
+                    <i data-lucide="${modeData.timetable === 'Class Active' ? 'book-open' : 'coffee'}" class="w-3 h-3"></i>
+                    ${modeData.timetable}
+                  </div>
+                </div>
+
+                <!-- AI 30-Min Prediction -->
+                <div class="bg-white p-2 rounded-lg border border-slate-100 shadow-2xs">
+                  <div class="text-[10px] uppercase font-semibold text-slate-400">AI 30m Pred</div>
+                  <div class="text-xs font-bold flex items-center gap-1 mt-0.5 ${modeData.prediction > 50 ? 'text-forest-700' : 'text-slate-500'}">
+                    <i data-lucide="sparkles" class="w-3 h-3 text-sage"></i>
+                    ${modeData.prediction}% Occupancy
+                  </div>
+                </div>
+
+                <!-- Power Relay State -->
+                <div class="bg-white p-2 rounded-lg border border-slate-100 shadow-2xs">
+                  <div class="text-[10px] uppercase font-semibold text-slate-400">Relay State</div>
+                  <div class="text-xs font-extrabold flex items-center gap-1.5 mt-0.5 ${isRelayOn ? 'text-amber-700' : 'text-emerald-700'}">
+                    <span class="w-2 h-2 rounded-full ${isRelayOn ? 'bg-amber-500' : 'bg-emerald-600'}"></span>
+                    ${currentRelay}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- Faculty Manual Override Button -->
+            <div class="sm:pl-3 sm:border-l sm:border-slate-200 flex sm:flex-col items-center justify-between gap-2 shrink-0">
+              <span class="text-[10px] uppercase font-semibold text-slate-400 sm:text-center block">Faculty Action</span>
+              <button 
+                onclick="toggleFacultyOverride('${room.id}')"
+                class="px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm ${
+                  isOverridden 
+                    ? 'bg-amber-500 text-white hover:bg-amber-600 ring-2 ring-amber-300' 
+                    : isRelayOn 
+                      ? 'bg-slate-200 text-slate-700 hover:bg-slate-300' 
+                      : 'bg-forest-800 text-white hover:bg-forest-700 ring-1 ring-forest-900'
+                }"
+              >
+                <i data-lucide="${isOverridden ? 'unlock' : 'power'}" class="w-3.5 h-3.5"></i>
+                <span>${isOverridden ? 'Override ACTIVE (ON)' : 'Manual Override (Turn ON)'}</span>
+              </button>
+            </div>
+
+          </div>
+        `;
+
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+    }
+
+    // Faculty Manual Override Handler
+    function toggleFacultyOverride(roomId) {
+      const room = state.rooms.find(r => r.id === roomId);
+      if (!room) return;
+
+      room.manualOverride = !room.manualOverride;
+      
+      if (room.manualOverride) {
+        logEvent(
+          'FACULTY OVERRIDE TRIGGERED',
+          `Authorized manual power restoration to <strong>${room.name}</strong>. Relay state set to forced [ON]. AI occupancy cutoff bypassed for 60 min.`,
+          'override'
+        );
+      } else {
+        logEvent(
+          'FACULTY OVERRIDE RELEASED',
+          `Manual hold removed from <strong>${room.name}</strong>. Returning relay authority to automated AI load shedder.`,
+          'info'
+        );
+      }
+
+      renderRooms();
+    }
+
+    // AI Simulation 1: 15-Min Vacancy Cutoff
+    function simulateVacancyCutoff() {
+      let cutCount = 0;
+
+      state.rooms.forEach(room => {
+        const modeData = room[state.mode];
+        // If room is vacant according to sensor or has low occupancy and relay was ON
+        if (modeData.pir === 'Vacant' || modeData.timetable === 'Empty Break') {
+          if (room.manualOverride || modeData.relay === 'ON') {
+            room.manualOverride = false;
+            modeData.relay = 'AUTO CUTOFF';
+            cutCount++;
+          }
+        }
+      });
+
+      // Add energy savings incremental
+      const incrementalSaved = (Math.random() * 4.2 + 8.5); // ~8.5 - 12.7 kWh
+      state.additionalSavedEnergy += incrementalSaved;
+
+      logEvent(
+        'AI VACANCY CUTOFF EXECUTED',
+        `PIR stillness detected >15 min. Disconnected non-essential sub-panels across idle wings. +${incrementalSaved.toFixed(1)} kWh idle energy saved and recorded in ESG ledger.`,
+        'success'
+      );
+
+      updateKPIs();
+      renderRooms();
+    }
+
+    // AI Simulation 2: Simulate Plumbing Pipe Leak
+    function simulateLeak() {
+      state.leakSimulated = true;
+      logEvent(
+        'CRITICAL LEAK ANOMALY',
+        `Acoustic flow meters recorded 32,500 L/hr surge in Main Block conduit! AI automated shutoff solenoid protocol issued to valve actuator #V-12.`,
+        'alert'
+      );
+      updateKPIs();
+    }
+
+    // AI Simulation 3: Reset System Baseline
+    function resetBaseline() {
+      state.leakSimulated = false;
+      state.additionalSavedEnergy = 0;
+      
+      // Reset room data to baseline
+      state.rooms[0].weekday.relay = 'ON';
+      state.rooms[1].weekday.relay = 'AUTO CUTOFF';
+      state.rooms[2].weekday.relay = 'ON';
+      state.rooms[3].weekday.relay = 'AUTO CUTOFF';
+
+      state.rooms.forEach(r => {
+        r.manualOverride = false;
+        r.weekend.relay = 'AUTO CUTOFF';
+      });
+
+      logEvent(
+        'SYSTEM RESET BASELINE',
+        'System metrics restored to nominal factory baseline. Flow rate normalized to 480 L/hr. Manual overrides released.',
+        'info'
+      );
+
+      updateKPIs();
+      renderRooms();
+    }
+
+    // Initialization
+    window.addEventListener('DOMContentLoaded', () => {
+      // Seed initial audit log entries
+      logEvent('SYSTEM BOOT', 'EcoPrime Core IoT Engine v2.4 initialized on GNIOT Campus Gateway.', 'info');
+      logEvent('MQTT CONNECT', 'Telemetry streams synced: 4 Room Sensors, 1 Hydraulic Main Riser.', 'success');
+      logEvent('TIMETABLE SYNC', 'Academic timetable database ingested. 99.6% predictive sync accuracy validated.', 'success');
+
+      updateKPIs();
+      renderRooms();
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
