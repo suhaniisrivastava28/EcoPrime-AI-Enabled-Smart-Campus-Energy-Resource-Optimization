@@ -1,5 +1,7 @@
 # EcoPrime: AI-Enabled Campus Sustainability Prototype | GNIOT
 
+> 🌐 **Live Demo:** [https://ecoprime-gniot.vercel.app](https://ecoprime-gniot.vercel.app)
+
 Interactive single-page web dashboard prototype developed for **Greater Noida Institute of Technology (GNIOT)** by **Team Project Prime**.
 
 ## 🌿 Theme & Color Palette
