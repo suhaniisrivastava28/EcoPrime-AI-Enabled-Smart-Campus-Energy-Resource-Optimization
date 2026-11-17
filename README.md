@@ -2,7 +2,22 @@
 
 > 🌐 **Live Demo:** [https://ecoprime-gniot.vercel.app](https://ecoprime-gniot.vercel.app)
 
-Interactive single-page web dashboard prototype developed for **Greater Noida Institute of Technology (GNIOT)** by **Team Project Prime**.
+Interactive single-page web dashboard and Python AI backend prototype developed for **Greater Noida Institute of Technology (GNIOT)** by **Team Project Prime**.
+
+## 🧠 Python AI & IoT Architecture
+- `app.py`: Flask REST API gateway serving edge telemetry and live decision triggers.
+- `ai_engine.py`: 
+  - **CampusOccupancyPredictor**: Sensor fusion algorithm correlating timetable data, diurnal temporal curves, and PIR thermal counts.
+  - **WaterAnomalyDetector**: Z-score statistical flow-rate anomaly detector for acoustic surge detection.
+  - **CarbonEnergyLedger**: ESG carbon abatement calculations based on the Northern Regional Grid emission factor (0.82 kg CO2e / kWh).
+- `iot_simulator.py`: IoT edge simulator managing 4 lecture wings, smart relays, and hydraulic flow telemetry.
+
+### Running the Python Backend Locally
+```bash
+pip install -r requirements.txt
+python app.py
+```
+Open `http://localhost:8080` in your browser.
 
 ## 🌿 Theme & Color Palette
 - **Dark Forest Green**: `#0F4C3A`
